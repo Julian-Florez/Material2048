@@ -3,17 +3,10 @@ package com.myg.material2048.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.File
 
-@Serializable
-private data class ColorsConfig(
-    val accent1: List<String>,
-    val accent2: List<String>,
-    val accent3: List<String>,
-    val neutral1: List<String>,
-    val neutral2: List<String>
+data class ColorsConfig(
+    val accent1: Map<Int, String>
 )
 
 @Composable
@@ -32,8 +25,37 @@ private fun loadColorsConfig(): ColorsConfig? {
     return try {
         val file = File("C:\\Program Files\\MaterialYouWindows\\colors")
         if (file.exists()) {
-            val jsonContent = file.readText()
-            Json.decodeFromString<ColorsConfig>(jsonContent)
+            val lines = file.readLines()
+            val accent1Map = mutableMapOf<Int, String>()
+            
+            var inTable = false
+            for (line in lines) {
+                if (line.startsWith("--- System Colors Table ---")) {
+                    inTable = true
+                    continue
+                }
+                if (inTable) {
+                    if (line.startsWith("Tone")) continue
+                    
+                    // Format: Tone,Accent1,Accent2,Accent3,Neutral1,Neutral2
+                    // Example: 100,#FFFFDCC1,#FFFFDDB8,...
+                    val parts = line.split(",")
+                    if (parts.size >= 2) {
+                        val tone = parts[0].trim().toIntOrNull()
+                        val accent1 = parts[1].trim()
+                        
+                        if (tone != null) {
+                            accent1Map[tone] = accent1
+                        }
+                    }
+                }
+            }
+            
+            if (accent1Map.isNotEmpty()) {
+                ColorsConfig(accent1Map)
+            } else {
+                null
+            }
         } else {
             null
         }
@@ -44,41 +66,40 @@ private fun loadColorsConfig(): ColorsConfig? {
 }
 
 private fun getDynamicTileColors(value: Int, config: ColorsConfig): Pair<Color, Color> {
-    // Map 2048 values to tones in accent1
-    // The input lists have 10 colors.
-    // Index 0 is lightest (tone 100/90), Index 9 is darkest (tone 10).
-    
-    // We want light tiles for low numbers, dark tiles for high numbers? 
-    // Or just distinct colors.
-    // The original 2048 goes from light beige to orange/red/yellow.
-    
-    // Let's use accent1 for the tiles, shifting from light to dark.
-    // The list has 10 items.
-    
-    val toneIndex = when (value) {
-        2 -> 0 // Lightest
-        4 -> 1
-        8 -> 2
-        16 -> 3
-        32 -> 4
-        64 -> 5
-        128 -> 6
-        256 -> 7
-        512 -> 8
-        1024 -> 9 // Darkest
-        else -> 9
+    val tone = when (value) {
+        2 -> 50     // Android 2 -> 50
+        4 -> 100    // Android 4 -> 100
+        8 -> 200
+        16 -> 300
+        32 -> 400
+        64 -> 500
+        128 -> 600
+        256 -> 700
+        512 -> 800
+        1024 -> 900
+        else -> 1000
     }
 
-    val backgroundColor = parseColor(config.accent1.getOrElse(toneIndex) { "#000000" })
+    val backgroundColorString = config.accent1[tone] ?: "#000000"
+    val backgroundColor = parseColor(backgroundColorString)
     
-    // Text color logic: Dark text for light backgrounds (indices 0-4), Light text for dark backgrounds (indices 5-9)
-    val textColor = if (toneIndex <= 4) {
-        // Dark text from neutral1 (index 9 is dark)
-        parseColor(config.neutral1.getOrElse(9) { "#000000" })
-    } else {
-        // Light text from neutral1 (index 0 is light)
-        parseColor(config.neutral1.getOrElse(0) { "#ffffff" })
-    }
+    // Text colors:
+    // Light text -> Tone 100
+    // Dark text -> Tone 800
+    // Note: If 50 is lighter than 100, usually 100 is light enough.
+    // However, if we follow Android logic strictly:
+    // textLightId = system_accent1_100
+    // textDarkId = system_accent1_800
+    
+    val textLightString = config.accent1[100] ?: "#ffffff"
+    val textDarkString = config.accent1[800] ?: "#000000"
+    
+    val textLight = parseColor(textLightString)
+    val textDark = parseColor(textDarkString)
+
+    // Contrast adjustment
+    // if tone <= 400 use textDark, else use textLight
+    val textColor = if (tone <= 400) textDark else textLight
 
     return backgroundColor to textColor
 }
@@ -104,10 +125,12 @@ private fun parseColor(colorString: String): Color {
     return try {
         val hex = colorString.removePrefix("#")
         val longValue = java.lang.Long.parseLong(hex, 16)
-        if (hex.length == 6) {
+        if (hex.length == 8) {
+            Color(longValue)
+        } else if (hex.length == 6) {
             Color(longValue or 0xFF000000)
         } else {
-            Color(longValue)
+            Color.Magenta
         }
     } catch (ex: Exception) {
         Color.Magenta 

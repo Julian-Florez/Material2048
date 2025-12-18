@@ -40,9 +40,7 @@ compose.desktop {
             windows {
                 console = false // Disable console
                 iconFile.set(project.file("src/desktopMain/resources/icon.ico"))
-                // Ensure vendor is also set specifically for Windows if needed, though top-level usually works for MSI
-                // Some packagers might look for specific windows properties.
-                // For MSI, the 'vendor' property above is key.
+                shortcut = true // Create desktop shortcut
             }
             
             linux {
