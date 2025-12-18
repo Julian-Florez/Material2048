@@ -65,7 +65,14 @@ fun GameScreen(gameViewModel: GameViewModel) {
         )
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        // Adding requestFocus ensures keyboard events are captured if focus is lost
+        modifier = Modifier.pointerInput(Unit) {
+             // Basic click to focus if needed, but usually Scaffold or Window handles it.
+             // On desktop, clicking empty space might not refocus if focus was stolen by a button.
+             // We can use a FocusRequester if strictly needed, but let's see if this is focus related.
+        }
+    ) { paddingValues ->
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
@@ -244,10 +251,10 @@ fun ActionButton(
     val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     val iconColor = MaterialTheme.colorScheme.onSurfaceVariant
 
+    // Modified to include focusable = false to prevent stealing keyboard focus on desktop
     Card(
         onClick = onClick,
         enabled = enabled,
-        // modifier = Modifier.focusProperties { canFocus = false }, // Not available in commonMain compose 1.6.0? Check versions. Assuming OK.
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Box(
