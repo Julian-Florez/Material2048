@@ -21,7 +21,9 @@ kotlin {
 
 compose.desktop {
     application {
+        // Updated to fully qualified name after moving Main.kt to a package
         mainClass = "com.myg.material2048.desktop.MainKt"
+        
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Material2048"
@@ -31,7 +33,7 @@ compose.desktop {
             includeAllModules = true
             
             windows {
-                console = true // Enable console to debug JVM launch errors
+                console = true // Enable console to see startup errors
             }
         }
     }

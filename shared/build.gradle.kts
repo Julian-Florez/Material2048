@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -30,6 +31,7 @@ kotlin {
                 // Removed Android-specific lifecycle dependency from commonMain
                 api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
                 implementation(compose.materialIconsExtended)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val androidMain by getting {
