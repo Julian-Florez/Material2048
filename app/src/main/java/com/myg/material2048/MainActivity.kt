@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
 import com.myg.material2048.model.Direction
+import com.myg.material2048.shared.AndroidGameStorage
 import com.myg.material2048.ui.GameScreen
 import com.myg.material2048.ui.theme.Material2048Theme
 import com.myg.material2048.viewmodel.GameViewModel
@@ -21,14 +24,24 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: GameViewModel by viewModels()
+    private val viewModel: GameViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
+                    return GameViewModel(AndroidGameStorage(applicationContext)) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    }
+    
     private var isMenuVisible = false
     private var canUndo = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
+        
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
@@ -52,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // Start tracking to detect long press
             event.startTracking()
             return true
         }
@@ -98,11 +110,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking && !event.isCanceled) {
-            // Short press detected
             if (canUndo && !isMenuVisible) {
                 viewModel.undo()
             }
-            // Swallow the event to prevent exit even if we didn't undo
             return true
         }
         return super.onKeyUp(keyCode, event)

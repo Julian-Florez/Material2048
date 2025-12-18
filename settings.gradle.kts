@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Material2048"
 include(":app")
+include(":shared")
+include(":desktop")
