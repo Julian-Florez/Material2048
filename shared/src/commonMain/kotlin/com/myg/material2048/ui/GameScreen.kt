@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SentimentVeryDissatisfied
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,35 +44,46 @@ fun GameScreen(gameViewModel: GameViewModel) {
         // Do nothing
     }
 
-    var swipeDirection by remember { mutableStateOf<Direction?>(null) }
+    // State to track if we've already handled a move in the current gesture
+    var hasMovedInCurrentGesture by remember { mutableStateOf(false) }
     
     val gameModifier = Modifier.pointerInput(Unit) {
         detectDragGestures(
+            onDragStart = {
+                hasMovedInCurrentGesture = false
+            },
             onDragEnd = {
-                swipeDirection?.let {
-                    gameViewModel.onMove(it)
-                    swipeDirection = null
-                }
+                hasMovedInCurrentGesture = false
+            },
+            onDragCancel = {
+                hasMovedInCurrentGesture = false
             },
             onDrag = { change, dragAmount ->
                 change.consume()
-                val (x, y) = dragAmount
-                if (abs(x) > abs(y)) {
-                    if (x > 0) swipeDirection = Direction.RIGHT else if (x < 0) swipeDirection = Direction.LEFT
-                } else {
-                    if (y > 0) swipeDirection = Direction.DOWN else if (y < 0) swipeDirection = Direction.UP
+                // Only process move if we haven't already moved in this gesture
+                if (!hasMovedInCurrentGesture) {
+                    val (x, y) = dragAmount
+                    // Threshold to prevent accidental small moves
+                    val threshold = 20f 
+                    if (abs(x) > abs(y)) {
+                        if (abs(x) > threshold) {
+                            if (x > 0) gameViewModel.onMove(Direction.RIGHT) else gameViewModel.onMove(Direction.LEFT)
+                            hasMovedInCurrentGesture = true
+                        }
+                    } else {
+                         if (abs(y) > threshold) {
+                            if (y > 0) gameViewModel.onMove(Direction.DOWN) else gameViewModel.onMove(Direction.UP)
+                            hasMovedInCurrentGesture = true
+                        }
+                    }
                 }
             }
         )
     }
 
     Scaffold(
-        // Adding requestFocus ensures keyboard events are captured if focus is lost
-        modifier = Modifier.pointerInput(Unit) {
-             // Basic click to focus if needed, but usually Scaffold or Window handles it.
-             // On desktop, clicking empty space might not refocus if focus was stolen by a button.
-             // We can use a FocusRequester if strictly needed, but let's see if this is focus related.
-        }
+        // Moving the gesture detector to Scaffold so it covers the whole screen
+        modifier = Modifier.then(gameModifier)
     ) { paddingValues ->
         BoxWithConstraints(
             modifier = Modifier
@@ -100,7 +112,7 @@ fun GameScreen(gameViewModel: GameViewModel) {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                         ScoreCard(score = uiState.score, isCompact = isCompact)
+                         ScoreCard(score = uiState.score, bestScore = uiState.bestScore, isCompact = isCompact)
                          Spacer(modifier = Modifier.height(spacing))
                          Row {
                             ActionButton(
@@ -132,7 +144,6 @@ fun GameScreen(gameViewModel: GameViewModel) {
                             modifier = Modifier
                                 .size(boardSize)
                                 .aspectRatio(1f)
-                                .then(gameModifier)
                         ) {
                             GameBoardWithOverlay(uiState, gameViewModel, boardSize)
                         }
@@ -148,7 +159,7 @@ fun GameScreen(gameViewModel: GameViewModel) {
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
                     
-                    Header(score = uiState.score, onUndo = { gameViewModel.undo() }, onRestart = { gameViewModel.restartGame() }, canUndo = uiState.canUndo)
+                    Header(score = uiState.score, bestScore = uiState.bestScore, onUndo = { gameViewModel.undo() }, onRestart = { gameViewModel.restartGame() }, canUndo = uiState.canUndo)
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
@@ -161,7 +172,6 @@ fun GameScreen(gameViewModel: GameViewModel) {
                             modifier = Modifier
                                 .size(boardSize)
                                 .aspectRatio(1f)
-                                .then(gameModifier)
                         ) {
                             GameBoardWithOverlay(uiState, gameViewModel, boardSize)
                         }
@@ -191,13 +201,13 @@ fun GameBoardWithOverlay(uiState: com.myg.material2048.model.GameUiState, gameVi
 }
 
 @Composable
-fun Header(score: Int, onUndo: () -> Unit, onRestart: () -> Unit, canUndo: Boolean) {
+fun Header(score: Int, bestScore: Int, onUndo: () -> Unit, onRestart: () -> Unit, canUndo: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom 
     ) {
-        ScoreCard(score = score)
+        ScoreCard(score = score, bestScore = bestScore)
 
         Row {
             ActionButton(
@@ -217,9 +227,10 @@ fun Header(score: Int, onUndo: () -> Unit, onRestart: () -> Unit, canUndo: Boole
 }
 
 @Composable
-fun ScoreCard(score: Int, isCompact: Boolean = false) {
+fun ScoreCard(score: Int, bestScore: Int, isCompact: Boolean = false) {
     val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
 
     Card(
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
@@ -227,10 +238,31 @@ fun ScoreCard(score: Int, isCompact: Boolean = false) {
         Column(
             modifier = Modifier.padding(
                 horizontal = if (isCompact) 12.dp else 24.dp,
-                vertical = if (isCompact) 8.dp else 16.dp
+                vertical = if (isCompact) 8.dp else 12.dp
             ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Best Score Display
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = labelColor
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = bestScore.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = labelColor,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Current Score Display
             Text(
                 text = score.toString(), 
                 style = if (isCompact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall, 

@@ -14,6 +14,14 @@ class AndroidGameStorage(context: Context) : GameStorage {
         return prefs.getInt("score", -1)
     }
 
+    override fun saveBestScore(score: Int) {
+        prefs.edit().putInt("best_score", score).apply()
+    }
+
+    override fun getBestScore(): Int {
+        return prefs.getInt("best_score", 0)
+    }
+
     override fun saveBoard(boardStr: String) {
         prefs.edit().putString("board", boardStr).apply()
     }

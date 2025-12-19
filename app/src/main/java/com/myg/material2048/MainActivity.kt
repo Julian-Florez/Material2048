@@ -70,16 +70,14 @@ class MainActivity : ComponentActivity() {
         }
 
         return when (keyCode) {
-            KeyEvent.KEYCODE_BUTTON_Y,
-            KeyEvent.KEYCODE_SHIFT_LEFT,
-            KeyEvent.KEYCODE_SHIFT_RIGHT -> {
+            KeyEvent.KEYCODE_Z, // Common UNDO shortcut
+            KeyEvent.KEYCODE_U -> { // U for Undo
                 viewModel.undo()
                 true
             }
             
-            KeyEvent.KEYCODE_BUTTON_B,
-            KeyEvent.KEYCODE_CTRL_LEFT,
-            KeyEvent.KEYCODE_CTRL_RIGHT -> {
+            KeyEvent.KEYCODE_R, // R for Restart
+            KeyEvent.KEYCODE_N -> { // N for New Game
                 viewModel.restartGame()
                 true
             }
@@ -115,6 +113,14 @@ class MainActivity : ComponentActivity() {
             }
             return true
         }
+        // Handle modifiers if needed, but for simple shortcuts direct key codes are often enough
+        if (event.isCtrlPressed) {
+             if (keyCode == KeyEvent.KEYCODE_Z) {
+                 viewModel.undo()
+                 return true
+             }
+        }
+        
         return super.onKeyUp(keyCode, event)
     }
 }

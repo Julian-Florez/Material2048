@@ -13,6 +13,14 @@ class DesktopGameStorage : GameStorage {
         return prefs.getInt("score", -1)
     }
 
+    override fun saveBestScore(score: Int) {
+        prefs.putInt("best_score", score)
+    }
+
+    override fun getBestScore(): Int {
+        return prefs.getInt("best_score", 0)
+    }
+
     override fun saveBoard(boardStr: String) {
         prefs.put("board", boardStr)
     }

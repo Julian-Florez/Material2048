@@ -29,6 +29,7 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
 
     private fun loadGame() {
         val savedScore = storage.getScore()
+        val bestScore = storage.getBestScore()
         val savedBoardStr = storage.getBoard()
 
         if (savedScore != -1 && savedBoardStr != null) {
@@ -36,18 +37,24 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
             _uiState.value = GameUiState(
                 board = board,
                 score = savedScore,
+                bestScore = bestScore,
                 isGameOver = isGameOver(board),
                 canUndo = false
             )
             lastValidUndoBoard = null
             lastValidUndoScore = 0
         } else {
-            restartGame()
+            restartGame(loadBestScore = true)
         }
     }
 
     private fun saveGame() {
         storage.saveScore(_uiState.value.score)
+        if (_uiState.value.score > _uiState.value.bestScore) {
+             storage.saveBestScore(_uiState.value.score)
+             // We also update the local state best score if saveGame is called
+             // but it is usually updated in onMove before calling saveGame
+        }
         storage.saveBoard(serializeBoard(_uiState.value.board))
     }
     
@@ -75,13 +82,20 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
         return board
     }
 
-    fun restartGame() {
+    fun restartGame(loadBestScore: Boolean = false) {
         viewModelScope.launch {
+            // Ensure we load the freshest best score from storage if requested OR if we are just restarting
+            // If loadBestScore is true (app launch), we trust storage.
+            // If normal restart, we also trust storage or current state.
+            // Since bestScore is persistent, let's always fetch it from storage to be safe, 
+            // or use the current known maximum.
+            val bestScore = if (loadBestScore) storage.getBestScore() else kotlin.math.max(_uiState.value.bestScore, storage.getBestScore())
+            
             var board: List<List<Tile?>> = List(GRID_SIZE) { List(GRID_SIZE) { null } }
             board = addRandomTile(board)
             board = addRandomTile(board)
 
-            _uiState.value = GameUiState(board = board, score = 0, isGameOver = false, hasWon = false, keepPlaying = false, canUndo = false)
+            _uiState.value = GameUiState(board = board, score = 0, bestScore = bestScore, isGameOver = false, hasWon = false, keepPlaying = false, canUndo = false)
             lastValidUndoBoard = null
             lastValidUndoScore = 0
             saveGame()
@@ -107,6 +121,13 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
                 val newBoard = addRandomTile(result.board)
                 val newScore = _uiState.value.score + result.points
                 
+                // Correct logic: Compare new score with current best score
+                var currentBestScore = _uiState.value.bestScore
+                if (newScore > currentBestScore) {
+                    currentBestScore = newScore
+                    storage.saveBestScore(currentBestScore) // Save immediately
+                }
+                
                 val reached2048 = newBoard.any { row -> row.any { it?.value == 2048 } }
                 val currentlyWon = _uiState.value.hasWon
                 val hasWonNow = !currentlyWon && reached2048
@@ -117,6 +138,7 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
                     it.copy(
                         board = newBoard,
                         score = newScore,
+                        bestScore = currentBestScore,
                         isGameOver = isGameOver,
                         hasWon = currentlyWon || hasWonNow,
                         canUndo = true
@@ -153,6 +175,7 @@ class GameViewModel(private val storage: GameStorage) : ViewModel() {
                         score = lastValidUndoScore,
                         isGameOver = false,
                         canUndo = false
+                        // We do NOT revert bestScore on undo, standard 2048 behavior
                     )
                 }
                 lastValidUndoBoard = null
