@@ -5,16 +5,16 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
 actual fun getPlatformColorScheme(darkTheme: Boolean): ColorScheme? {
-    // Return the custom static color scheme directly
+    // Return the custom static color scheme directly to improve startup performance
     return customColorScheme
 }
 
+// Static definition to avoid runtime parsing overhead
 private val customColorScheme = ColorScheme(
     primary = Color(0xFFD7CA00),
     onPrimary = Color(0xFF353100),
