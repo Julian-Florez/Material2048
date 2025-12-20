@@ -1,62 +1,68 @@
 package com.myg.material2048.ui
 
-import android.os.Build
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
+// Static configuration to ensure zero-overhead startup and consistent performance
+private val SYSTEM_ACCENT1_PALETTE = mapOf(
+    50 to Color(0xFFFFF482),
+    100 to Color(0xFFF6E600),
+    200 to Color(0xFFD7CA00),
+    300 to Color(0xFFBAAE00),
+    400 to Color(0xFF9D9300),
+    500 to Color(0xFF827900),
+    600 to Color(0xFF676000),
+    700 to Color(0xFF4D4800),
+    800 to Color(0xFF353100),
+    900 to Color(0xFF1F1C00),
+    1000 to Color(0xFF000000)
+)
+
+private val TEXT_LIGHT = SYSTEM_ACCENT1_PALETTE[100]!!
+private val TEXT_DARK = SYSTEM_ACCENT1_PALETTE[800]!!
+
+// Pre-computed cache of colors for each tile value
+private val TILE_COLOR_CACHE: Map<Int, Pair<Color, Color>> = run {
+    val map = mutableMapOf<Int, Pair<Color, Color>>()
+    
+    // Mapping of Game Value -> Tone
+    val valueToTone = mapOf(
+        2 to 50,
+        4 to 100,
+        8 to 200,
+        16 to 300,
+        32 to 400,
+        64 to 500,
+        128 to 600,
+        256 to 700,
+        512 to 800,
+        1024 to 900
+    )
+
+    // Populate cache for standard values
+    valueToTone.forEach { (value, tone) ->
+        val bg = SYSTEM_ACCENT1_PALETTE[tone] ?: Color.Black
+        // Contrast logic: Tone <= 400 uses Dark Text, otherwise Light Text
+        val fg = if (tone <= 400) TEXT_DARK else TEXT_LIGHT
+        map[value] = bg to fg
+    }
+    
+    // Default fallback for higher values (Tone 1000)
+    val defaultBg = SYSTEM_ACCENT1_PALETTE[1000]!!
+    val defaultFg = TEXT_LIGHT
+    map[-1] = defaultBg to defaultFg
+    
+    map
+}
 
 @Composable
 actual fun getPlatformTileColors(value: Int): Pair<Color, Color> {
-    val context = LocalContext.current
-    val colorScheme = MaterialTheme.colorScheme
-    
-    // Only use dynamic colors on Android 12+ (S) and if supported
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        remember(value, context, colorScheme) {
-            val tone = when (value) {
-                2 -> 50
-                4 -> 100
-                8 -> 200
-                16 -> 300
-                32 -> 400
-                64 -> 500
-                128 -> 600
-                256 -> 700
-                512 -> 800
-                1024 -> 900
-                else -> 1000
-            }
-
-            val colorId = context.resources.getIdentifier("system_accent1_$tone", "color", "android")
-            
-            val backgroundColor = if (colorId != 0) {
-                Color(context.resources.getColor(colorId, context.theme))
-            } else {
-                colorScheme.primaryContainer
-            }
-
-            // Obtener colores "accent" profundos del sistema para el texto
-            val textLightId = context.resources.getIdentifier("system_accent1_100", "color", "android")
-            val textDarkId = context.resources.getIdentifier("system_accent1_800", "color", "android")
-
-            val textLight = if (textLightId != 0) Color(context.resources.getColor(textLightId, context.theme)) else Color.White
-            val textDark = if (textDarkId != 0) Color(context.resources.getColor(textDarkId, context.theme)) else Color.Black
-
-            // Ajuste de contraste
-            val textColor = if (tone <= 400) textDark else textLight
-
-            backgroundColor to textColor
-        }
-    } else {
-        // Fallback for older Android versions
-        getStaticTileColors(value)
-    }
+    // Immediate lookup, no parsing, no context access, no object allocation per call (cached pairs)
+    return TILE_COLOR_CACHE[value] ?: TILE_COLOR_CACHE[-1]!!
 }
 
 fun getStaticTileColors(value: Int): Pair<Color, Color> {
-    // Basic fallback colors (same as desktop/default)
+    // Legacy/Fallback colors
     return when (value) {
         2 -> Color(0xFFEEE4DA) to Color(0xFF776E65)
         4 -> Color(0xFFEDE0C8) to Color(0xFF776E65)

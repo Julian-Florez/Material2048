@@ -6,7 +6,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -75,91 +74,104 @@ fun TileView(tile: Tile, size: Dp, cornerRadius: Dp, modifier: Modifier = Modifi
 @Composable
 fun GameBoard(
     board: List<List<Tile?>>,
+    boardSize: Dp,
     modifier: Modifier = Modifier
 ) {
-    BoxWithConstraints(
+    val gridColor = MaterialTheme.colorScheme.surfaceVariant
+
+    val cornerRadius = boardSize * 0.05f 
+    val tileCornerRadius = cornerRadius * 0.75f
+
+    val cellSize = (boardSize - 16.dp - 24.dp) / 4
+
+    Box(
         modifier = modifier
+            .size(boardSize)
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(gridColor)
+            .padding(8.dp)
     ) {
-        val gridColor = MaterialTheme.colorScheme.surfaceVariant
-
-        // Calculate the available size for the board
-        val boardSize = if (maxWidth < maxHeight) maxWidth else maxHeight
-        
-        val cornerRadius = boardSize * 0.05f 
-        val tileCornerRadius = cornerRadius * 0.75f
-
-        val cellSize = (boardSize - 16.dp - 24.dp) / 4
-
-        Box(
-            modifier = Modifier
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(cornerRadius))
-                .background(gridColor)
-                .padding(8.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                repeat(4) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        repeat(4) {
-                            Box(
-                                modifier = Modifier
-                                    .size(cellSize)
-                                    .background(
-                                        color = gridColor,
-                                        shape = RoundedCornerShape(tileCornerRadius)
-                                    )
-                            )
-                        }
-                    }
-                }
-            }
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                val tilePositions = remember(board) {
-                    board.flatMapIndexed { r, row ->
-                        row.mapIndexedNotNull { c, tile ->
-                            tile?.let { it to (r to c) }
-                        }
-                    }.associate { it }
-                }
-
-                val tilesToRender = mutableListOf<Triple<Tile, Pair<Int, Int>, Boolean>>() 
-
-                tilePositions.forEach { (tile, position) ->
-                    if (tile.mergedFrom != null && !tile.isFromUndo) {
-                        val sources = tile.mergedFrom
-                        if (sources.size == 2) {
-                            val t1 = sources[0]
-                            val t2 = sources[1]
-                            
-                            tilesToRender.add(Triple(t1, position, true))
-                            tilesToRender.add(Triple(t2, position, true))
-                            tilesToRender.add(Triple(tile, position, false))
-                        } else {
-                            tilesToRender.add(Triple(tile, position, false))
-                        }
-                    } else {
-                        tilesToRender.add(Triple(tile, position, false))
-                    }
-                }
-
-                tilesToRender.forEach { (tile, position, isTransient) ->
-                    val key = if (isTransient) "transient_${tile.id}" else "tile_${tile.id}"
-                    
-                    key(key) {
-                        AnimatedTile(
-                            tile = tile,
-                            targetPosition = position,
-                            cellSize = cellSize,
-                            cornerRadius = tileCornerRadius,
-                            isTransient = isTransient
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(4) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    repeat(4) {
+                        Box(
+                            modifier = Modifier
+                                .size(cellSize)
+                                .background(
+                                    color = gridColor,
+                                    shape = RoundedCornerShape(tileCornerRadius)
+                                )
                         )
                     }
                 }
             }
         }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            val tilePositions = remember(board) {
+                board.flatMapIndexed { r, row ->
+                    row.mapIndexedNotNull { c, tile ->
+                        tile?.let { it to (r to c) }
+                    }
+                }.associate { it }
+            }
+
+            val tilesToRender = mutableListOf<Triple<Tile, Pair<Int, Int>, Boolean>>() 
+
+            tilePositions.forEach { (tile, position) ->
+                if (tile.mergedFrom != null && !tile.isFromUndo) {
+                    val sources = tile.mergedFrom
+                    if (sources.size == 2) {
+                        val t1 = sources[0]
+                        val t2 = sources[1]
+                        
+                        tilesToRender.add(Triple(t1, position, true))
+                        tilesToRender.add(Triple(t2, position, true))
+                        tilesToRender.add(Triple(tile, position, false))
+                    } else {
+                        tilesToRender.add(Triple(tile, position, false))
+                    }
+                } else {
+                    tilesToRender.add(Triple(tile, position, false))
+                }
+            }
+
+            tilesToRender.forEach { (tile, position, isTransient) ->
+                val key = if (isTransient) "transient_${tile.id}" else "tile_${tile.id}"
+                
+                key(key) {
+                    AnimatedTile(
+                        tile = tile,
+                        targetPosition = position,
+                        cellSize = cellSize,
+                        cornerRadius = tileCornerRadius,
+                        isTransient = isTransient
+                    )
+                }
+            }
+        }
     }
 }
+
+// Cache for animation specs to avoid recreating them
+private val moveSpec = spring<Float>(
+    dampingRatio = Spring.DampingRatioLowBouncy,
+    stiffness = Spring.StiffnessMedium
+)
+
+private val scaleSpecMedium = spring<Float>(
+    stiffness = Spring.StiffnessMedium
+)
+
+private val scaleSpecMediumBouncy = spring<Float>(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = Spring.StiffnessMedium
+)
+
+private val alphaSpecHigh = spring<Float>(stiffness = Spring.StiffnessHigh)
+
 
 @Composable
 private fun AnimatedTile(
@@ -199,19 +211,13 @@ private fun AnimatedTile(
             launch {
                 animatedX.animateTo(
                     targetX,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
+                    animationSpec = moveSpec
                 )
             }
             launch {
                 animatedY.animateTo(
                     targetY,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
+                    animationSpec = moveSpec
                 )
             }
         } else {
@@ -224,7 +230,7 @@ private fun AnimatedTile(
         if (isTransient) {
             val delayTime = if (isFar) 150L else 50L
             delay(delayTime)
-            animatedAlpha.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessHigh))
+            animatedAlpha.animateTo(0f, animationSpec = alphaSpecHigh)
             isVisible = false
         } 
     }
@@ -250,21 +256,18 @@ private fun AnimatedTile(
                 animatedScale.snapTo(0.5f)
                 animatedScale.animateTo(
                     1.1f, 
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                    animationSpec = scaleSpecMedium
                 )
                 animatedScale.animateTo(
                     1f, 
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                    animationSpec = scaleSpecMedium
                 )
             } else if (isNew || tile.isFromUndo) {
                 if (animatedScale.value == 0f) {
                     delay(50)
                     animatedScale.animateTo(
                         1f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
-                        )
+                        animationSpec = scaleSpecMediumBouncy
                     )
                 }
             } else {

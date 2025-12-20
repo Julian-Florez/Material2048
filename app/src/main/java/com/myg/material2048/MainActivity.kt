@@ -6,9 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +27,7 @@ import com.myg.material2048.shared.AndroidGameStorage
 import com.myg.material2048.ui.GameScreen
 import com.myg.material2048.ui.theme.Material2048Theme
 import com.myg.material2048.viewmodel.GameViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -57,7 +65,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    GameScreen(gameViewModel = viewModel)
+                    var showLoading by remember { mutableStateOf(true) }
+                    
+                    LaunchedEffect(Unit) {
+                        delay(200) // Small delay to let the UI settle
+                        showLoading = false
+                    }
+
+                    if (showLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background)
+                        )
+                    } else {
+                        GameScreen(gameViewModel = viewModel)
+                    }
                 }
             }
         }

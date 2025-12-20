@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -85,99 +86,57 @@ fun GameScreen(gameViewModel: GameViewModel) {
         // Moving the gesture detector to Scaffold so it covers the whole screen
         modifier = Modifier.then(gameModifier)
     ) { paddingValues ->
-        BoxWithConstraints(
+        // Assuming Landscape for TV and removing dynamic checks
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val isLandscape = maxWidth > maxHeight
-            
-            if (isLandscape) {
-                val isCompact = maxWidth < 600.dp
-                val panelWidth = if (isCompact) 130.dp else 200.dp
-                val spacing = if (isCompact) 12.dp else 24.dp
-                
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(panelWidth),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                         ScoreCard(score = uiState.score, bestScore = uiState.bestScore, isCompact = isCompact)
-                         Spacer(modifier = Modifier.height(spacing))
-                         Row {
-                            ActionButton(
-                                onClick = { gameViewModel.undo() },
-                                enabled = uiState.canUndo,
-                                icon = Icons.AutoMirrored.Filled.Undo,
-                                contentDescription = "Deshacer"
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            ActionButton(
-                                onClick = { gameViewModel.restartGame() },
-                                icon = Icons.Default.Refresh,
-                                contentDescription = "Reiniciar"
-                            )
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.width(spacing))
-                    
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val boardSize = min(maxWidth, maxHeight)
-                        
-                        Box(
-                            modifier = Modifier
-                                .size(boardSize)
-                                .aspectRatio(1f)
-                        ) {
-                            GameBoardWithOverlay(uiState, gameViewModel, boardSize)
-                        }
-                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(200.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                 ScoreCard(score = uiState.score, bestScore = uiState.bestScore, isCompact = false)
+                 Spacer(modifier = Modifier.height(24.dp))
+                 Row {
+                    ActionButton(
+                        onClick = { gameViewModel.undo() },
+                        enabled = uiState.canUndo,
+                        icon = Icons.AutoMirrored.Filled.Undo,
+                        contentDescription = "Deshacer"
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    ActionButton(
+                        onClick = { gameViewModel.restartGame() },
+                        icon = Icons.Default.Refresh,
+                        contentDescription = "Reiniciar"
+                    )
                 }
-            } else {
-                Column(
+            }
+            
+            Spacer(modifier = Modifier.width(24.dp))
+            
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                // Determine board size based on available space
+                val boardSize = if (maxWidth < maxHeight) maxWidth else maxHeight
+                
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        .size(boardSize)
+                        .aspectRatio(1f)
                 ) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    
-                    Header(score = uiState.score, bestScore = uiState.bestScore, onUndo = { gameViewModel.undo() }, onRestart = { gameViewModel.restartGame() }, canUndo = uiState.canUndo)
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    BoxWithConstraints(
-                         modifier = Modifier.fillMaxWidth(),
-                         contentAlignment = Alignment.Center
-                    ) {
-                        val boardSize = min(maxWidth, maxHeight)
-                        Box(
-                            modifier = Modifier
-                                .size(boardSize)
-                                .aspectRatio(1f)
-                        ) {
-                            GameBoardWithOverlay(uiState, gameViewModel, boardSize)
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.weight(1f))
+                    GameBoardWithOverlay(uiState, gameViewModel, boardSize)
                 }
             }
         }
@@ -186,7 +145,7 @@ fun GameScreen(gameViewModel: GameViewModel) {
 
 @Composable
 fun GameBoardWithOverlay(uiState: com.myg.material2048.model.GameUiState, gameViewModel: GameViewModel, boardSize: Dp) {
-    GameBoard(board = uiState.board)
+    GameBoard(board = uiState.board, boardSize = boardSize)
     val cornerRadius = boardSize * 0.05f
 
     if (uiState.isGameOver) {
@@ -287,7 +246,8 @@ fun ActionButton(
     Card(
         onClick = onClick,
         enabled = enabled,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        modifier = Modifier.focusProperties { canFocus = false }
     ) {
         Box(
             modifier = Modifier.padding(12.dp),
