@@ -1,0 +1,518 @@
+kotlin version: 2.0.21
+error message: org.jetbrains.kotlin.backend.common.CompilationException: Back-end: Please report this problem https://kotl.in/issue
+/home/teamcity/agent/work/8a20760945d0aeba/compose/ui/ui-text/src/skikoMain/kotlin/androidx/compose/ui/text/platform/ParagraphLayouter.skiko.kt:60:1
+Problem with `@StabilityInferred(parameters = 0)
+internal class ParagraphLayouter {
+  constructor(text: String, textDirection: ResolvedTextDirection, style: TextStyle, spanStyles: List<Range<SpanStyle>>, placeholders: List<Range<Placeholder>>, density: Density, fontFamilyResolver: Resolver) /* primary */ {
+    super/*Any*/()
+    { // BLOCK
+      <this>.#text = text
+      <this>.#builder = ParagraphBuilder(fontFamilyResolver = fontFamilyResolver, text = <this>.#text, textStyle = style, brushSize = // COMPOSITE {
+      null
+      // }, ellipsis = // COMPOSITE {
+      null
+      // }, maxLines = // COMPOSITE {
+      null
+      // }, spanStyles = spanStyles, placeholders = placeholders, density = density, textDirection = textDirection, drawStyle = // COMPOSITE {
+      null
+      // }, blendMode = // COMPOSITE {
+      null
+      // }, $mask0 = 3128, $marker = null)
+      <this>.#paragraphCache = null
+      <this>.#updateForeground = false
+      <this>.#width = { // BLOCK
+        Companion_getInstance()
+        NaNF
+      }
+    }
+  }
+
+  fun <get-text>(): String {
+    return <this>.#text
+  }
+
+  private /* final field */ val text: String
+  private fun <get-builder>(): ParagraphBuilder {
+    return <this>.#builder
+  }
+
+  private /* final field */ val builder: ParagraphBuilder
+  private fun <set-paragraphCache>(<set-?>: Paragraph?) {
+    <this>.#paragraphCache = <set-?>
+  }
+
+  private fun <get-paragraphCache>(): Paragraph? {
+    return <this>.#paragraphCache
+  }
+
+  private var paragraphCache: Paragraph?
+  private fun <set-updateForeground>(<set-?>: Boolean) {
+    <this>.#updateForeground = <set-?>
+  }
+
+  private fun <get-updateForeground>(): Boolean {
+    return <this>.#updateForeground
+  }
+
+  private var updateForeground: Boolean
+  private fun <set-width>(<set-?>: Float) {
+    <this>.#width = <set-?>
+  }
+
+  private fun <get-width>(): Float {
+    return <this>.#width
+  }
+
+  private var width: Float
+  fun <get-defaultFont>(): Font {
+    return <this>.#builder.<get-defaultFont>()
+  }
+
+  fun <get-textStyle>(): TextStyle {
+    return <this>.#builder.#textStyle
+  }
+
+  private fun invalidateParagraph(onlyForeground: Boolean) {
+    when {
+      when {
+        onlyForeground -> <this>.#builder.#spanStyles.isEmpty()
+        true -> false
+      } -> { // BLOCK
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.#updateForeground = true
+        Unit
+        // })
+      }
+      true -> { // BLOCK
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.#paragraphCache = null
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun invalidateParagraph$default(/* var */ onlyForeground: Boolean?, $mask0: Int, $handler: Any?) {
+    when {
+      Boolean__not-impl($this = wasm_i32_eq(a = Int__and-impl($this = $mask0, other = 1), b = 0)) -> consumeAnyIntoVoid(a = // COMPOSITE {
+      onlyForeground = boxIntrinsic<Boolean, Boolean?>(x = false)
+      Unit
+      // })
+    }
+    return <this>.invalidateParagraph(onlyForeground = onlyForeground /*as Boolean */)
+  }
+
+  internal fun emptyLineMetrics(paragraph: Paragraph): Array<LineMetrics> {
+    return <this>.#builder.emptyLineMetrics(paragraph = paragraph) /*as Array<LineMetrics> */
+  }
+
+  fun setParagraphStyle(maxLines: Int, ellipsis: String) {
+    when {
+      when {
+        Boolean__not-impl($this = wasm_i32_eq(a = <this>.#builder.#maxLines, b = maxLines)) -> true
+        true -> Boolean__not-impl($this = <this>.#builder.#ellipsis.equals(other = ellipsis))
+      } -> { // BLOCK
+        <this>.#builder.#maxLines = maxLines
+        <this>.#builder.#ellipsis = ellipsis
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph$default(onlyForeground = // COMPOSITE {
+        null
+        // }, $mask0 = 1, $handler = null)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun setColor(color: Color) {
+    val actualColor: Color = { // RETURNABLE BLOCK
+      { // INLINED FUNCTION BLOCK
+        // COMPOSITE {
+        val this: Color = { // BLOCK
+          color
+        }
+        // }
+        return when {
+          { // RETURNABLE BLOCK
+            { // INLINED FUNCTION BLOCK
+              // COMPOSITE {
+              val this: Color = { // BLOCK
+                this
+              }
+              // }
+              return Boolean__not-impl($this = wasm_i64_eq(a = <Color__<get-value>-impl>($this = this), b = 16L))
+            }
+          } -> this
+          true -> { // RETURNABLE BLOCK
+            { // INLINED FUNCTION BLOCK
+              return <this>.#builder.#textStyle.<get-color>()
+            }
+          }
+        }
+      }
+    }
+    when {
+      Boolean__not-impl($this = boxIntrinsic<Color, Any>(x = <this>.#builder.#textStyle.<get-color>()).equals(other = boxIntrinsic<Color, Any?>(x = actualColor))) -> { // BLOCK
+        <this>.#builder.#textStyle = <this>.#builder.#textStyle.copy$default(color = boxIntrinsic<Color, Color?>(x = actualColor), fontSize = // COMPOSITE {
+        null
+        // }, fontWeight = // COMPOSITE {
+        null
+        // }, fontStyle = // COMPOSITE {
+        null
+        // }, fontSynthesis = // COMPOSITE {
+        null
+        // }, fontFamily = // COMPOSITE {
+        null
+        // }, fontFeatureSettings = // COMPOSITE {
+        null
+        // }, letterSpacing = // COMPOSITE {
+        null
+        // }, baselineShift = // COMPOSITE {
+        null
+        // }, textGeometricTransform = // COMPOSITE {
+        null
+        // }, localeList = // COMPOSITE {
+        null
+        // }, background = // COMPOSITE {
+        null
+        // }, textDecoration = // COMPOSITE {
+        null
+        // }, shadow = // COMPOSITE {
+        null
+        // }, drawStyle = // COMPOSITE {
+        null
+        // }, textAlign = // COMPOSITE {
+        null
+        // }, textDirection = // COMPOSITE {
+        null
+        // }, lineHeight = // COMPOSITE {
+        null
+        // }, textIndent = // COMPOSITE {
+        null
+        // }, platformStyle = // COMPOSITE {
+        null
+        // }, lineHeightStyle = // COMPOSITE {
+        null
+        // }, lineBreak = // COMPOSITE {
+        null
+        // }, hyphens = // COMPOSITE {
+        null
+        // }, textMotion = // COMPOSITE {
+        null
+        // }, $mask0 = 16777214, $handler = null)
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph(onlyForeground = true)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun setBrush(brush: Brush?, brushSize: Size, alpha: Float) {
+    val actualSize: Size = <this>.#builder.#brushSize
+    when {
+      when {
+        when {
+          when {
+            when {
+              Boolean__not-impl($this = nullableEquals(lhs = <this>.#builder.#textStyle.<get-brush>(), rhs = brush)) -> true
+              true -> { // RETURNABLE BLOCK
+                { // INLINED FUNCTION BLOCK
+                  // COMPOSITE {
+                  val this: Size = { // BLOCK
+                    actualSize
+                  }
+                  // }
+                  return wasm_i64_eq(a = <Size__<get-packedValue>-impl>($this = this), b = 9205357640488583168L)
+                }
+              }
+            } -> true
+            true -> Boolean__not-impl($this = <Size__<get-width>-impl>($this = actualSize).sameValueAs(other = <Size__<get-width>-impl>($this = brushSize)))
+          } -> true
+          true -> Boolean__not-impl($this = <Size__<get-height>-impl>($this = actualSize).sameValueAs(other = <Size__<get-height>-impl>($this = brushSize)))
+        } -> true
+        true -> Boolean__not-impl($this = <this>.#builder.#textStyle.<get-alpha>().sameValueAs(other = alpha))
+      } -> { // BLOCK
+        <this>.#builder.#textStyle = <this>.#builder.#textStyle.copy$default(brush = brush, alpha = boxIntrinsic<Float, Float?>(x = alpha), fontSize = // COMPOSITE {
+        null
+        // }, fontWeight = // COMPOSITE {
+        null
+        // }, fontStyle = // COMPOSITE {
+        null
+        // }, fontSynthesis = // COMPOSITE {
+        null
+        // }, fontFamily = // COMPOSITE {
+        null
+        // }, fontFeatureSettings = // COMPOSITE {
+        null
+        // }, letterSpacing = // COMPOSITE {
+        null
+        // }, baselineShift = // COMPOSITE {
+        null
+        // }, textGeometricTransform = // COMPOSITE {
+        null
+        // }, localeList = // COMPOSITE {
+        null
+        // }, background = // COMPOSITE {
+        null
+        // }, textDecoration = // COMPOSITE {
+        null
+        // }, shadow = // COMPOSITE {
+        null
+        // }, drawStyle = // COMPOSITE {
+        null
+        // }, textAlign = // COMPOSITE {
+        null
+        // }, textDirection = // COMPOSITE {
+        null
+        // }, lineHeight = // COMPOSITE {
+        null
+        // }, textIndent = // COMPOSITE {
+        null
+        // }, platformStyle = // COMPOSITE {
+        null
+        // }, lineHeightStyle = // COMPOSITE {
+        null
+        // }, lineBreak = // COMPOSITE {
+        null
+        // }, hyphens = // COMPOSITE {
+        null
+        // }, textMotion = // COMPOSITE {
+        null
+        // }, $mask0 = 33554428, $handler = null)
+        <this>.#builder.#brushSize = brushSize
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph(onlyForeground = true)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun setBrushSize(brushSize: Size) {
+    when {
+      Boolean__not-impl($this = boxIntrinsic<Size, Any>(x = <this>.#builder.#brushSize).equals(other = boxIntrinsic<Size, Any?>(x = brushSize))) -> { // BLOCK
+        <this>.#builder.#brushSize = brushSize
+        when {
+          when {
+            <this>.#builder.#textStyle.<get-brush>() is ShaderBrush -> true
+            true -> { // RETURNABLE BLOCK
+              { // INLINED FUNCTION BLOCK
+                // COMPOSITE {
+                val this: Iterable<Any?> = { // BLOCK
+                  <this>.#builder.#spanStyles
+                }
+                // }
+                when {
+                  when {
+                    this is Collection<Any?> -> this /*as Collection<Any?> */.isEmpty()
+                    true -> false
+                  } -> return false
+                }
+                { // BLOCK
+                  val tmp0_iterator: Iterator<Any?> = this.iterator()
+                  while (tmp0_iterator.hasNext()) { // BLOCK
+                    val element: Any? = tmp0_iterator.next()
+                    when {
+                      { // RETURNABLE BLOCK
+                        { // INLINED FUNCTION BLOCK
+                          // COMPOSITE {
+                          val it: Range<SpanStyle> = { // BLOCK
+                            element
+                          }
+                          // }
+                          return it.#item /*as SpanStyle */.<get-brush>() is ShaderBrush
+                        }
+                      } -> return true
+                    }
+                  }
+                }
+                return false
+              }
+            }
+          } -> { // BLOCK
+            consumeAnyIntoVoid(a = // COMPOSITE {
+            <this>.invalidateParagraph(onlyForeground = true)
+            Unit
+            // })
+          }
+        }
+      }
+    }
+  }
+
+  fun setTextStyle(shadow: Shadow?, textDecoration: TextDecoration?) {
+    when {
+      when {
+        Boolean__not-impl($this = nullableEquals(lhs = <this>.#builder.#textStyle.<get-shadow>(), rhs = shadow)) -> true
+        true -> Boolean__not-impl($this = nullableEquals(lhs = <this>.#builder.#textStyle.<get-textDecoration>(), rhs = textDecoration))
+      } -> { // BLOCK
+        <this>.#builder.#textStyle = <this>.#builder.#textStyle.copy$default(color = // COMPOSITE {
+        null
+        // }, fontSize = // COMPOSITE {
+        null
+        // }, fontWeight = // COMPOSITE {
+        null
+        // }, fontStyle = // COMPOSITE {
+        null
+        // }, fontSynthesis = // COMPOSITE {
+        null
+        // }, fontFamily = // COMPOSITE {
+        null
+        // }, fontFeatureSettings = // COMPOSITE {
+        null
+        // }, letterSpacing = // COMPOSITE {
+        null
+        // }, baselineShift = // COMPOSITE {
+        null
+        // }, textGeometricTransform = // COMPOSITE {
+        null
+        // }, localeList = // COMPOSITE {
+        null
+        // }, background = // COMPOSITE {
+        null
+        // }, textDecoration = textDecoration, shadow = shadow, drawStyle = // COMPOSITE {
+        null
+        // }, textAlign = // COMPOSITE {
+        null
+        // }, textDirection = // COMPOSITE {
+        null
+        // }, lineHeight = // COMPOSITE {
+        null
+        // }, textIndent = // COMPOSITE {
+        null
+        // }, platformStyle = // COMPOSITE {
+        null
+        // }, lineHeightStyle = // COMPOSITE {
+        null
+        // }, lineBreak = // COMPOSITE {
+        null
+        // }, hyphens = // COMPOSITE {
+        null
+        // }, textMotion = // COMPOSITE {
+        null
+        // }, $mask0 = 16764927, $handler = null)
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph$default(onlyForeground = // COMPOSITE {
+        null
+        // }, $mask0 = 1, $handler = null)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun setDrawStyle(drawStyle: DrawStyle?) {
+    when {
+      Boolean__not-impl($this = nullableEquals(lhs = <this>.#builder.#drawStyle, rhs = drawStyle)) -> { // BLOCK
+        <this>.#builder.#drawStyle = drawStyle
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph(onlyForeground = true)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun setBlendMode(blendMode: BlendMode) {
+    when {
+      Boolean__not-impl($this = boxIntrinsic<BlendMode, Any>(x = <this>.#builder.#blendMode).equals(other = boxIntrinsic<BlendMode, Any?>(x = blendMode))) -> { // BLOCK
+        <this>.#builder.#blendMode = blendMode
+        consumeAnyIntoVoid(a = // COMPOSITE {
+        <this>.invalidateParagraph$default(onlyForeground = // COMPOSITE {
+        null
+        // }, $mask0 = 1, $handler = null)
+        Unit
+        // })
+      }
+    }
+  }
+
+  fun layoutParagraph(width: Float): Paragraph {
+    var paragraph: Paragraph? = <this>.#paragraphCache
+    return when {
+      Boolean__not-impl($this = wasm_ref_is_null(a = paragraph)) -> { // BLOCK
+        var layoutRequired: Boolean = false
+        when {
+          <this>.#updateForeground -> { // BLOCK
+            <this>.#builder.updateForegroundPaint(paragraph = paragraph)
+            <this>.#updateForeground = false
+            consumeAnyIntoVoid(a = paragraph.markDirty())
+            consumeAnyIntoVoid(a = // COMPOSITE {
+            layoutRequired = true
+            Unit
+            // })
+          }
+        }
+        when {
+          Boolean__not-impl($this = <this>.#width.sameValueAs(other = width)) -> { // BLOCK
+            <this>.#width = width
+            consumeAnyIntoVoid(a = // COMPOSITE {
+            layoutRequired = true
+            Unit
+            // })
+          }
+        }
+        when {
+          layoutRequired -> { // BLOCK
+            consumeAnyIntoVoid(a = paragraph.layout(width = width))
+          }
+        }
+        paragraph
+      }
+      true -> { // BLOCK
+        paragraph = <this>.#builder.build()
+        consumeAnyIntoVoid(a = paragraph.layout(width = width))
+        <this>.#paragraphCache = paragraph
+        <this>.#updateForeground = false
+        return paragraph
+      }
+    }
+  }
+
+  /* fake */ override operator fun equals(other: Any?): Boolean
+
+  /* fake */ override fun hashCode(): Int
+
+  /* fake */ override fun toString(): String
+
+}
+
+`
+Details: Internal error in body lowering: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at java.base/java.util.Collections.singletonIterator(Collections.java:4808)
+	at java.base/java.util.Collections$SingletonList.iterator(Collections.java:4951)
+	at org.jetbrains.kotlin.ir.declarations.IrFunction.acceptChildren(IrFunction.kt:64)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitDeclaration(Lower.kt:174)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitDeclaration(Lower.kt:165)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitFunction(IrElementVisitor.kt:38)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitFunction(Lower.kt:165)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitFunction(Lower.kt:165)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitSimpleFunction(IrElementVisitor.kt:65)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitSimpleFunction(Lower.kt:165)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitSimpleFunction(Lower.kt:165)
+	at org.jetbrains.kotlin.ir.declarations.IrSimpleFunction.accept(IrSimpleFunction.kt:39)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitClass(Lower.kt:180)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringVisitor.visitClass(Lower.kt:165)
+	at org.jetbrains.kotlin.ir.declarations.IrClass.accept(IrClass.kt:72)
+	at org.jetbrains.kotlin.backend.common.LowerKt.runOnFilePostfix(Lower.kt:144)
+	at org.jetbrains.kotlin.backend.common.LowerKt.runOnFilePostfix$default(Lower.kt:137)
+	at org.jetbrains.kotlin.backend.common.BodyLoweringPass.lower(Lower.kt:76)
+	at org.jetbrains.kotlin.backend.common.FileLoweringPass.lower(Lower.kt:42)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt.makeIrModulePhase$lambda$5(PhaseBuilders.kt:110)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$$Lambda$1377/0x0000023848857420.invoke(Unknown Source)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$createSimpleNamedCompilerPhase$1.phaseBody(PhaseBuilders.kt:69)
+	at org.jetbrains.kotlin.backend.common.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:226)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.wasm.WasmCompilerKt.compileToLoweredIr(wasmCompiler.kt:108)
+	at org.jetbrains.kotlin.cli.js.K2JsIrCompiler.doExecute(K2JsIrCompiler.kt:410)
+	at org.jetbrains.kotlin.cli.js.K2JSCompiler.doExecute(K2JSCompiler.java:70)
+	at org.jetbrains.kotlin.cli.js.K2JSCompiler.doExecute(K2JSCompiler.java:33)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:103)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:49)
+	at org.jetbrains.kotlin.cli.common.CLITool.exec(CLITool.kt:101)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1555)
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	... 32 more
+
+
