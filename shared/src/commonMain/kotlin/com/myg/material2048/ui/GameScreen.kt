@@ -1,6 +1,7 @@
 package com.myg.material2048.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,8 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -35,6 +39,14 @@ expect fun BackHandler(enabled: Boolean = true, onBack: () -> Unit)
 fun GameScreen(gameViewModel: GameViewModel) {
     val uiState by gameViewModel.uiState.collectAsState()
     
+    // FocusRequester to ensure the game receives keyboard input
+    val focusRequester = remember { FocusRequester() }
+
+    // Request focus when the composable is first composed
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     BackHandler(enabled = uiState.canUndo) {
         gameViewModel.undo()
     }
@@ -47,39 +59,77 @@ fun GameScreen(gameViewModel: GameViewModel) {
     // State to track if we've already handled a move in the current gesture
     var hasMovedInCurrentGesture by remember { mutableStateOf(false) }
     
-    val gameModifier = Modifier.pointerInput(Unit) {
-        detectDragGestures(
-            onDragStart = {
-                hasMovedInCurrentGesture = false
-            },
-            onDragEnd = {
-                hasMovedInCurrentGesture = false
-            },
-            onDragCancel = {
-                hasMovedInCurrentGesture = false
-            },
-            onDrag = { change, dragAmount ->
-                change.consume()
-                // Only process move if we haven't already moved in this gesture
-                if (!hasMovedInCurrentGesture) {
-                    val (x, y) = dragAmount
-                    // Threshold to prevent accidental small moves
-                    val threshold = 20f 
-                    if (abs(x) > abs(y)) {
-                        if (abs(x) > threshold) {
-                            if (x > 0) gameViewModel.onMove(Direction.RIGHT) else gameViewModel.onMove(Direction.LEFT)
-                            hasMovedInCurrentGesture = true
+    val gameModifier = Modifier
+        .focusRequester(focusRequester)
+        .focusable()
+        .onKeyEvent { keyEvent ->
+            if (keyEvent.type == KeyEventType.KeyDown) {
+                when (keyEvent.key) {
+                    Key.DirectionUp, Key.W -> {
+                        gameViewModel.onMove(Direction.UP)
+                        true
+                    }
+                    Key.DirectionDown, Key.S -> {
+                        gameViewModel.onMove(Direction.DOWN)
+                        true
+                    }
+                    Key.DirectionLeft, Key.A -> {
+                        gameViewModel.onMove(Direction.LEFT)
+                        true
+                    }
+                    Key.DirectionRight, Key.D -> {
+                        gameViewModel.onMove(Direction.RIGHT)
+                        true
+                    }
+                    Key.Z -> {
+                        if (uiState.canUndo) {
+                            gameViewModel.undo()
                         }
-                    } else {
-                         if (abs(y) > threshold) {
-                            if (y > 0) gameViewModel.onMove(Direction.DOWN) else gameViewModel.onMove(Direction.UP)
-                            hasMovedInCurrentGesture = true
+                        true
+                    }
+                    Key.R -> {
+                        gameViewModel.restartGame()
+                        true
+                    }
+                    else -> false
+                }
+            } else {
+                false
+            }
+        }
+        .pointerInput(Unit) {
+            detectDragGestures(
+                onDragStart = {
+                    hasMovedInCurrentGesture = false
+                },
+                onDragEnd = {
+                    hasMovedInCurrentGesture = false
+                },
+                onDragCancel = {
+                    hasMovedInCurrentGesture = false
+                },
+                onDrag = { change, dragAmount ->
+                    change.consume()
+                    // Only process move if we haven't already moved in this gesture
+                    if (!hasMovedInCurrentGesture) {
+                        val (x, y) = dragAmount
+                        // Threshold to prevent accidental small moves
+                        val threshold = 20f
+                        if (abs(x) > abs(y)) {
+                            if (abs(x) > threshold) {
+                                if (x > 0) gameViewModel.onMove(Direction.RIGHT) else gameViewModel.onMove(Direction.LEFT)
+                                hasMovedInCurrentGesture = true
+                            }
+                        } else {
+                            if (abs(y) > threshold) {
+                                if (y > 0) gameViewModel.onMove(Direction.DOWN) else gameViewModel.onMove(Direction.UP)
+                                hasMovedInCurrentGesture = true
+                            }
                         }
                     }
                 }
-            }
-        )
-    }
+            )
+        }
 
     Scaffold(
         // Moving the gesture detector to Scaffold so it covers the whole screen
