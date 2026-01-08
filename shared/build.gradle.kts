@@ -19,6 +19,16 @@ kotlin {
     
     jvm("desktop")
     
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "material2048.js"
+            }
+        }
+        binaries.executable()
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -45,6 +55,11 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.kotlinx.coroutines.swing)
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+                // Web-specific dependencies if needed
             }
         }
     }

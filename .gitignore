@@ -16,3 +16,11 @@ local.properties
 # Gradle / Compose
 build/
 **/build/
+
+# Node.js / Kotlin/Wasm
+node_modules/
+kotlin-js-store/
+yarn.lock
+package.json
+package-lock.json
+
