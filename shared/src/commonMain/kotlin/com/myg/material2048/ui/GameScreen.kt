@@ -103,21 +103,6 @@ fun GameScreen(gameViewModel: GameViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                  ScoreCard(score = uiState.score, bestScore = uiState.bestScore, isCompact = false)
-                 Spacer(modifier = Modifier.height(24.dp))
-                 Row {
-                    ActionButton(
-                        onClick = { gameViewModel.undo() },
-                        enabled = uiState.canUndo,
-                        icon = Icons.AutoMirrored.Filled.Undo,
-                        contentDescription = "Deshacer"
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    ActionButton(
-                        onClick = { gameViewModel.restartGame() },
-                        icon = Icons.Default.Refresh,
-                        contentDescription = "Reiniciar"
-                    )
-                }
             }
             
             Spacer(modifier = Modifier.width(24.dp))
