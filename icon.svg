@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512mm"
+   height="512mm"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.22627417"
+     inkscape:cx="634.1864"
+     inkscape:cy="1555.6349"
+     inkscape:window-width="1196"
+     inkscape:window-height="1020"
+     inkscape:window-x="696"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="278.81472"
+       y="580.864"
+       width="4507.5046"
+       height="2904.32"
+       id="rect1" />
+  </defs>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.29486371,0,0,0.29486371,-76.856089,-29.271945)"
+       id="text1"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:717.846px;font-family:'Google Sans Flex';-inkscape-font-specification:'Google Sans Flex Bold';text-align:start;letter-spacing:-0.41px;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect1);fill:#827900;stroke:#827900;stroke-width:20.0315;paint-order:markers stroke fill"><tspan
+         x="278.81445"
+         y="1224.4592"
+         id="tspan9"><tspan
+           style="fill:#ffdcc1;stroke:none"
+           id="tspan5">2</tspan><tspan
+           style="fill:#ffb779;stroke:none"
+           id="tspan6">0</tspan><tspan
+           style="fill:#d87900;stroke:none"
+           id="tspan7">4</tspan><tspan
+           style="fill:#b26300;stroke:none"
+           id="tspan8">8</tspan></tspan></text>
+  </g>
+</svg>
