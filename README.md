@@ -44,7 +44,3 @@ Una versión moderna del clásico **2048**, diseñada con **Material Design 3** 
 ```bash
 ./gradlew :web:wasmJsBrowserDistribution
 ```
-
-## 📄 Licencia
-
-MIT License
