@@ -36,6 +36,9 @@ import kotlin.math.abs
 expect fun BackHandler(enabled: Boolean = true, onBack: () -> Unit)
 
 @Composable
+expect fun ObservePlatformFocusLifecycle(focusRequester: FocusRequester)
+
+@Composable
 fun GameScreen(gameViewModel: GameViewModel) {
     val uiState by gameViewModel.uiState.collectAsState()
     
@@ -46,6 +49,11 @@ fun GameScreen(gameViewModel: GameViewModel) {
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+    LaunchedEffect(uiState) {
+        // Reassert focus whenever the UI state changes (e.g., after clicking Undo)
+        focusRequester.requestFocus()
+    }
+    ObservePlatformFocusLifecycle(focusRequester)
 
     BackHandler(enabled = uiState.canUndo) {
         gameViewModel.undo()
@@ -335,6 +343,7 @@ fun ActionButton(
 
     // Modified to include focusable = false to prevent stealing keyboard focus on desktop
     Card(
+        modifier = Modifier.focusable(false),
         onClick = onClick,
         enabled = enabled,
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
