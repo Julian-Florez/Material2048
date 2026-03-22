@@ -39,6 +39,28 @@ Una versión moderna del clásico **2048**, diseñada con **Material Design 3** 
 ./gradlew :desktop:run
 ```
 
+### Android
+
+Ejecutar en un dispositivo o emulador con la build de debug:
+
+```bash
+./gradlew :app:installDebug
+```
+
+Generar el APK listo para distribuir (carpeta `app/build/outputs/apk/release/`):
+
+```bash
+./gradlew :app:assembleRelease
+```
+
+### Instalador Windows (MSI)
+
+Requiere WiX 3.11 (el repo ya incluye una copia portátil en `build/wix311`). El instalador se genera en `desktop/build/compose/binaries/main/msi/`:
+
+```bash
+./gradlew :desktop:packageReleaseMsi
+```
+
 ### Producción Web
 
 ```bash

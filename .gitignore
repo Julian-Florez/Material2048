@@ -16,6 +16,8 @@ local.properties
 # Gradle / Compose
 build/
 **/build/
+.idea/
+.kotlin/
 
 # Node.js / Kotlin/Wasm
 node_modules/
