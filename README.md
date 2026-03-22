@@ -55,8 +55,6 @@ Generar el APK listo para distribuir (carpeta `app/build/outputs/apk/release/`):
 
 ### Instalador Windows (MSI)
 
-Requiere WiX 3.11 (el repo ya incluye una copia portátil en `build/wix311`). El instalador se genera en `desktop/build/compose/binaries/main/msi/`:
-
 ```bash
 ./gradlew :desktop:packageReleaseMsi
 ```
