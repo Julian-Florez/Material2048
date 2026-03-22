@@ -5,10 +5,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import java.io.File
 
-data class ColorsConfig(
-    val accent1: Map<Int, String>
-)
-
 @Composable
 actual fun getPlatformTileColors(value: Int): Pair<Color, Color> {
     return remember(value) {
@@ -25,37 +21,7 @@ private fun loadColorsConfig(): ColorsConfig? {
     return try {
         val file = File("C:\\Program Files\\MaterialYouWindows\\colors")
         if (file.exists()) {
-            val lines = file.readLines()
-            val accent1Map = mutableMapOf<Int, String>()
-            
-            var inTable = false
-            for (line in lines) {
-                if (line.startsWith("--- System Colors Table ---")) {
-                    inTable = true
-                    continue
-                }
-                if (inTable) {
-                    if (line.startsWith("Tone")) continue
-                    
-                    // Format: Tone,Accent1,Accent2,Accent3,Neutral1,Neutral2
-                    // Example: 100,#FFFFDCC1,#FFFFDDB8,...
-                    val parts = line.split(",")
-                    if (parts.size >= 2) {
-                        val tone = parts[0].trim().toIntOrNull()
-                        val accent1 = parts[1].trim()
-                        
-                        if (tone != null) {
-                            accent1Map[tone] = accent1
-                        }
-                    }
-                }
-            }
-            
-            if (accent1Map.isNotEmpty()) {
-                ColorsConfig(accent1Map)
-            } else {
-                null
-            }
+            parseColorsConfigLines(file.readLines())
         } else {
             null
         }
@@ -118,21 +84,5 @@ private fun getStaticTileColors(value: Int): Pair<Color, Color> {
         1024 -> Color(0xFFEDC53F) to Color.White
         2048 -> Color(0xFFEDC22E) to Color.White
         else -> Color(0xFF3C3A32) to Color.White
-    }
-}
-
-private fun parseColor(colorString: String): Color {
-    return try {
-        val hex = colorString.removePrefix("#")
-        val longValue = java.lang.Long.parseLong(hex, 16)
-        if (hex.length == 8) {
-            Color(longValue)
-        } else if (hex.length == 6) {
-            Color(longValue or 0xFF000000)
-        } else {
-            Color.Magenta
-        }
-    } catch (ex: Exception) {
-        Color.Magenta 
     }
 }

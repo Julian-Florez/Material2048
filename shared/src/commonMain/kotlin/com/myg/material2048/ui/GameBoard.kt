@@ -41,6 +41,25 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+// Cache the animations specs to improve performance
+private val StandardMoveAnimationSpec = spring<Float>(
+    dampingRatio = Spring.DampingRatioLowBouncy,
+    stiffness = Spring.StiffnessMedium
+)
+
+private val TransientAnimationSpec = spring<Float>(
+    stiffness = Spring.StiffnessHigh
+)
+
+private val MergeScaleAnimationSpec = spring<Float>(
+    stiffness = Spring.StiffnessMedium
+)
+
+private val NewTileScaleAnimationSpec = spring<Float>(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = Spring.StiffnessMedium
+)
+
 @Composable
 fun TileView(tile: Tile, size: Dp, cornerRadius: Dp, modifier: Modifier = Modifier) {
     val (backgroundColor, textColor) = getTileColors(tile.value)
@@ -123,24 +142,26 @@ fun GameBoard(
                     }.associate { it }
                 }
 
-                val tilesToRender = mutableListOf<Triple<Tile, Pair<Int, Int>, Boolean>>() 
-
-                tilePositions.forEach { (tile, position) ->
-                    if (tile.mergedFrom != null && !tile.isFromUndo) {
-                        val sources = tile.mergedFrom
-                        if (sources.size == 2) {
-                            val t1 = sources[0]
-                            val t2 = sources[1]
-                            
-                            tilesToRender.add(Triple(t1, position, true))
-                            tilesToRender.add(Triple(t2, position, true))
-                            tilesToRender.add(Triple(tile, position, false))
+                val tilesToRender = remember(tilePositions) {
+                    val list = mutableListOf<Triple<Tile, Pair<Int, Int>, Boolean>>() 
+                    tilePositions.forEach { (tile, position) ->
+                        if (tile.mergedFrom != null && !tile.isFromUndo) {
+                            val sources = tile.mergedFrom
+                            if (sources.size == 2) {
+                                val t1 = sources[0]
+                                val t2 = sources[1]
+                                
+                                list.add(Triple(t1, position, true))
+                                list.add(Triple(t2, position, true))
+                                list.add(Triple(tile, position, false))
+                            } else {
+                                list.add(Triple(tile, position, false))
+                            }
                         } else {
-                            tilesToRender.add(Triple(tile, position, false))
+                            list.add(Triple(tile, position, false))
                         }
-                    } else {
-                        tilesToRender.add(Triple(tile, position, false))
                     }
+                    list
                 }
 
                 tilesToRender.forEach { (tile, position, isTransient) ->
@@ -199,19 +220,13 @@ private fun AnimatedTile(
             launch {
                 animatedX.animateTo(
                     targetX,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
+                    animationSpec = StandardMoveAnimationSpec
                 )
             }
             launch {
                 animatedY.animateTo(
                     targetY,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMedium
-                    )
+                    animationSpec = StandardMoveAnimationSpec
                 )
             }
         } else {
@@ -224,7 +239,7 @@ private fun AnimatedTile(
         if (isTransient) {
             val delayTime = if (isFar) 150L else 50L
             delay(delayTime)
-            animatedAlpha.animateTo(0f, animationSpec = spring(stiffness = Spring.StiffnessHigh))
+            animatedAlpha.animateTo(0f, animationSpec = TransientAnimationSpec)
             isVisible = false
         } 
     }
@@ -250,21 +265,18 @@ private fun AnimatedTile(
                 animatedScale.snapTo(0.5f)
                 animatedScale.animateTo(
                     1.1f, 
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                    animationSpec = MergeScaleAnimationSpec
                 )
                 animatedScale.animateTo(
                     1f, 
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                    animationSpec = MergeScaleAnimationSpec
                 )
             } else if (isNew || tile.isFromUndo) {
                 if (animatedScale.value == 0f) {
                     delay(50)
                     animatedScale.animateTo(
                         1f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
-                        )
+                        animationSpec = NewTileScaleAnimationSpec
                     )
                 }
             } else {
